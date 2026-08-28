@@ -6,6 +6,14 @@ import (
 	"github.com/noamkalmar/bit/internal/utils"
 )
 
+func IsProjectInitalized() bool {
+	info, err := os.Stat(".bit")
+	if err == nil {
+		return info.IsDir()
+	}
+	return false
+}
+
 func InitMainDir() error {
 	// Initalizing default dirs
 	paths := []string{
