@@ -20,32 +20,42 @@ func CreateDirs(paths []string) error {
 	return nil
 }
 
+func CreateEmptyFiles(paths []string) error {
+	for _, path := range paths {
+		file, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+		file.Close()
+	}
+	return nil
+}
+
 func InitMainDir() error {
+	// Initalizing default dirs
 	paths := []string{
 		".bit/objects/commits",
 		".bit/objects/trees",
 		".bit/objects/blobs",
 		".bit/branches",
 	}
+	// Initalizing default files
 	err := CreateDirs(paths)
 	if err != nil {
 		return err
 	}
-	headFile, err := os.Create(".bit/head")
+	files := []string{
+		".bit/branches/" + defaultBranch,
+		".bit/head",
+		".bit/stage",
+	}
+	err = CreateEmptyFiles(files)
 	if err != nil {
 		return err
 	}
-	defer headFile.Close()
-	_, err = headFile.WriteString(defaultBranch)
-	if err != nil {
-		return err
-	}
-	stageFile, err := os.Create(".bit/stage")
-	if err != nil {
-		return err
-	}
-	stageFile.Close()
-	return nil
+	// Head file should contain the main branch at the beggining
+	err = os.WriteFile(".bit/head", []byte(defaultBranch), 0644)
+	return err
 }
 
 func GetHash(content []byte, hasher hash.Hash) string {
