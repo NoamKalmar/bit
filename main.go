@@ -28,15 +28,20 @@ func InitMainDir() error {
 	if err != nil {
 		return err
 	}
-	file, err := os.Create(".bit/head")
+	headFile, err := os.Create(".bit/head")
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-	_, err = file.WriteString(defaultBranch)
+	defer headFile.Close()
+	_, err = headFile.WriteString(defaultBranch)
 	if err != nil {
 		return err
 	}
+	stageFile, err := os.Create(".bit/stage")
+	if err != nil {
+		return err
+	}
+	stageFile.Close()
 	return nil
 }
 
