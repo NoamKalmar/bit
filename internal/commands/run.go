@@ -28,6 +28,11 @@ func RunCommand(command string, args []string) {
 		if err != nil {
 			fmt.Println("Error while tring to stage file/s: " + err.Error())
 		}
+	case "unstage":
+		err := UnstageFiles(args)
+		if err != nil {
+			fmt.Println("Error while tring to unstage file/s: " + err.Error())
+		}
 	default:
 		fmt.Println("Unknown command: " + command)
 	}

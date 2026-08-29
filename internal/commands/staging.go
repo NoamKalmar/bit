@@ -37,6 +37,22 @@ func StageFiles(paths []string) error {
 		}
 		stageData[path] = hash
 	}
-	files.WriteStageFile(stageData)
-	return nil
+	err = files.WriteStageFile(stageData)
+	return err
+}
+
+func UnstageFiles(paths []string) error {
+	stageData, err := files.ReadStageFile()
+	if err != nil {
+		return err
+	}
+	expandedPaths, err := utils.ExpandPaths(paths)
+	if err != nil {
+		return err
+	}
+	for _, path := range expandedPaths {
+		delete(stageData, path)
+	}
+	err = files.WriteStageFile(stageData)
+	return err
 }
