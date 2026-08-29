@@ -65,8 +65,8 @@ func ReadJsonStrStr(path string) (map[string]string, error) {
 	return stagingData, nil
 }
 
-func WriteJsonStrStr(path string, stagingData map[string]string) error {
-	stageFileData, err := json.MarshalIndent(stagingData, "", "    ")
+func WriteJsonStrStr(path string, data map[string]string) error {
+	stageFileData, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {
 		return err
 	}
