@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"hash"
 	"os"
+	"path/filepath"
 )
 
 func GetHash(content []byte, hasher hash.Hash) string {
@@ -22,6 +23,33 @@ func CreateDirs(paths []string) error {
 		}
 	}
 	return nil
+}
+
+func IsDir(path string) bool {
+	info, err := os.Stat(path)
+	if err == nil {
+		return info.IsDir()
+	}
+	return false
+}
+
+func ExpandPaths(paths []string) ([]string, error) {
+	var files []string
+	for _, path := range paths {
+		err := filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if !d.IsDir() {
+				files = append(files, path)
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, nil
+		}
+	}
+	return files, nil
 }
 
 func ReadJsonStrStr(path string) (map[string]string, error) {

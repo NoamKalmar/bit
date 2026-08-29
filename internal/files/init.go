@@ -7,11 +7,7 @@ import (
 )
 
 func IsProjectInitalized() bool {
-	info, err := os.Stat(".bit")
-	if err == nil {
-		return info.IsDir()
-	}
-	return false
+	return utils.IsDir(".bit")
 }
 
 func InitMainDir() error {

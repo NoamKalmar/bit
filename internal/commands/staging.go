@@ -26,7 +26,11 @@ func StageFiles(paths []string) error {
 		return err
 	}
 	hasher := sha1.New()
-	for _, path := range paths {
+	expandedPaths, err := utils.ExpandPaths(paths)
+	if err != nil {
+		return err
+	}
+	for _, path := range expandedPaths {
 		hash, err := fileToBlob(path, hasher)
 		if err != nil {
 			return err
