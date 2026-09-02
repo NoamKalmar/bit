@@ -3,15 +3,21 @@ package commands
 import (
 	"crypto/sha1"
 	"encoding/json"
+	"strings"
 
 	"github.com/noamkalmar/bit/internal/files"
 	"github.com/noamkalmar/bit/internal/utils"
 )
 
-func CreateCommit(commitMessage string) error {
+func CreateCommit(message []string) error {
+	commitMessage := strings.Join(message, "")
+	if commitMessage == "" {
+		commitMessage = "null"
+	}
 	commit := files.Commit{
 		TreeHash:         "null",
 		ParentCommitHash: "null",
+		Message:          commitMessage,
 	}
 	content, err := json.MarshalIndent(commit, "", "    ")
 	if err != nil {

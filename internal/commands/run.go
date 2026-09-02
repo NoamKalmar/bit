@@ -34,7 +34,7 @@ func RunCommand(command string, args []string) {
 			fmt.Println("Error while tring to unstage file/s: " + err.Error())
 		}
 	case "commit":
-		err := CreateCommit(args[0])
+		err := CreateCommit(args)
 		if err != nil {
 			fmt.Println("Error while tring to create a new commit: " + err.Error())
 		}

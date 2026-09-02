@@ -7,6 +7,7 @@ import (
 type Commit struct {
 	TreeHash         string `json:"tree"`
 	ParentCommitHash string `json:"parent"`
+	Message          string `json:"message"`
 }
 
 func createObject(objectType string, hash string, content []byte) error {
