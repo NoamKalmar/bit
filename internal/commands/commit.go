@@ -20,5 +20,10 @@ func CreateCommit(commitMessage string) error {
 	hasher := sha1.New()
 	hash := utils.GetHash(content, hasher)
 	files.CreateCommit(hash, content)
+	branch, err := files.ReadHeadFile()
+	if err != nil {
+		return err
+	}
+	files.WriteBranchRef(branch, hash)
 	return nil
 }
