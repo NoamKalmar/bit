@@ -1,13 +1,28 @@
 package files
 
-import "os"
+import (
+	"os"
+)
 
-func CreateBlob(hash string, content []byte) error {
-	file, err := os.Create(".bit/objects/blobs/" + hash)
+type Commit struct {
+	TreeHash         string `json:"tree"`
+	ParentCommitHash string `json:"parent"`
+}
+
+func createObject(objectType string, hash string, content []byte) error {
+	file, err := os.Create(".bit/objects/" + objectType + "/" + hash)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 	file.Write(content)
 	return nil
+}
+
+func CreateBlob(hash string, content []byte) error {
+	return createObject("blobs", hash, content)
+}
+
+func CreateCommit(hash string, content []byte) error {
+	return createObject("commits", hash, content)
 }

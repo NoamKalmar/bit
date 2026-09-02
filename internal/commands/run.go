@@ -33,6 +33,11 @@ func RunCommand(command string, args []string) {
 		if err != nil {
 			fmt.Println("Error while tring to unstage file/s: " + err.Error())
 		}
+	case "commit":
+		err := CreateCommit(args[0])
+		if err != nil {
+			fmt.Println("Error while tring to create a new commit: " + err.Error())
+		}
 	default:
 		fmt.Println("Unknown command: " + command)
 	}
