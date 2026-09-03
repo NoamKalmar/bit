@@ -11,12 +11,17 @@ import (
 
 func CreateCommit(message []string) error {
 	commitMessage := strings.Join(message, "")
-	if commitMessage == "" {
-		commitMessage = "null"
+	branch, err := files.ReadHeadFile()
+	if err != nil {
+		return err
+	}
+	parent, err := files.ReadBranchRef(branch) // last commit is the parent of the new commit
+	if err != nil {
+		return err
 	}
 	commit := files.Commit{
-		TreeHash:         "null",
-		ParentCommitHash: "null",
+		TreeHash:         "",
+		ParentCommitHash: parent,
 		Message:          commitMessage,
 	}
 	content, err := json.MarshalIndent(commit, "", "    ")
@@ -25,11 +30,7 @@ func CreateCommit(message []string) error {
 	}
 	hasher := sha1.New()
 	hash := utils.GetHash(content, hasher)
-	files.CreateCommit(hash, content)
-	branch, err := files.ReadHeadFile()
-	if err != nil {
-		return err
-	}
+	files.CreateCommit(hash, content) // Create a new commit object
 	files.WriteBranchRef(branch, hash)
 	return nil
 }
