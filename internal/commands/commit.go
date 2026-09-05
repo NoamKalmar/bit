@@ -14,7 +14,7 @@ import (
 )
 
 func CreateCommit(message []string) error {
-	commitMessage := strings.Join(message, "")
+	commitMessage := strings.Join(message, " ")
 	branch, err := files.ReadHeadFile()
 	if err != nil {
 		return err
@@ -28,9 +28,12 @@ func CreateCommit(message []string) error {
 		return err
 	}
 	hasher := sha1.New()
-	buildTree(".", stageData, hasher)
+	treeHash, err := buildTree(".", stageData, hasher)
+	if err != nil {
+		return err
+	}
 	commit := files.Commit{
-		TreeHash:         "",
+		TreeHash:         treeHash,
 		ParentCommitHash: parent,
 		Message:          commitMessage,
 	}
