@@ -6,6 +6,8 @@ import (
 	"hash"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 )
 
 func GetHash(content []byte, hasher hash.Hash) string {
@@ -31,6 +33,53 @@ func IsDir(path string) bool {
 		return info.IsDir()
 	}
 	return false
+}
+
+func IsFile(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return info.Mode().IsRegular()
+}
+
+func IsSameFile(path1 string, path2 string) bool {
+	file1, err := os.Stat(path1)
+	if err != nil {
+		return false
+	}
+	file2, err := os.Stat(path1)
+	if err != nil {
+		return false
+	}
+	return os.SameFile(file1, file2)
+}
+
+// Returns subdirs, files
+func ReadDirFromPaths(paths []string, currentPath string) ([]string, []string) {
+	currentPath = filepath.Clean(currentPath)
+	currentPath = filepath.ToSlash(currentPath)
+	var files []string
+	var subdirs []string
+	for _, path := range paths {
+		path = filepath.ToSlash(path)
+		if currentPath != "." {
+			var found bool
+			path, found = strings.CutPrefix(path, currentPath+"/")
+			if !found {
+				continue
+			}
+		}
+		if !strings.Contains(path, "/") {
+			files = append(files, path)
+		} else {
+			dir := strings.Split(path, "/")[0]
+			if !slices.Contains(subdirs, dir) {
+				subdirs = append(subdirs, dir)
+			}
+		}
+	}
+	return subdirs, files
 }
 
 func ExpandPaths(paths []string) ([]string, error) {
