@@ -43,18 +43,6 @@ func IsFile(path string) bool {
 	return info.Mode().IsRegular()
 }
 
-func IsSameFile(path1 string, path2 string) bool {
-	file1, err := os.Stat(path1)
-	if err != nil {
-		return false
-	}
-	file2, err := os.Stat(path1)
-	if err != nil {
-		return false
-	}
-	return os.SameFile(file1, file2)
-}
-
 // Returns subdirs, files
 func ReadDirFromPaths(paths []string, currentPath string) ([]string, []string) {
 	currentPath = filepath.Clean(currentPath)
