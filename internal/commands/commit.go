@@ -21,11 +21,11 @@ func CreateCommit(message []string) error {
 	if err != nil {
 		return err
 	}
-	stageData, err := files.ReadIndexFile()
+	indexData, err := files.ReadIndexFile()
 	if err != nil {
 		return err
 	}
-	treeHash, err := buildTree(".", stageData)
+	treeHash, err := buildTree(".", indexData)
 	if err != nil {
 		return err
 	}
@@ -45,15 +45,15 @@ func CreateCommit(message []string) error {
 }
 
 // Returns the hash of the built tree
-func buildTree(path string, stageData map[string]string) (string, error) {
-	toStage := slices.Collect(maps.Keys(stageData))
+func buildTree(path string, indexData map[string]string) (string, error) {
+	toStage := slices.Collect(maps.Keys(indexData))
 	tree := map[string]string{}
 	// Get all of the sub directories to the current directory
 	// Build a tree for each one recusivley
 	// Add this tree to the current tree
 	subdirs, filepaths := utils.ReadDirFromPaths(toStage, path)
 	for _, subdir := range subdirs {
-		hash, err := buildTree(path+"/"+subdir, stageData)
+		hash, err := buildTree(path+"/"+subdir, indexData)
 		if err != nil {
 			return "", err
 		}
@@ -61,7 +61,7 @@ func buildTree(path string, stageData map[string]string) (string, error) {
 	}
 	// Add blobs to the current tree
 	for _, filePath := range filepaths {
-		tree[filePath] = stageData[filepath.Join(path, filePath)]
+		tree[filePath] = indexData[filepath.Join(path, filePath)]
 	}
 	content, err := json.MarshalIndent(tree, "", "    ")
 	if err != nil {
