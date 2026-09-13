@@ -13,8 +13,11 @@ func fileToBlob(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	hash := utils.GetSHA1(content)
-	files.CreateBlob(hash, content)
+	blob := files.Blob(content)
+	hash, err := files.CreateObject(&blob)
+	if err != nil {
+		return "", nil
+	}
 	return hash, nil
 }
 

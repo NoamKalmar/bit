@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"encoding/json"
 	"maps"
 	"path/filepath"
 	"slices"
@@ -34,12 +33,10 @@ func CreateCommit(message []string) error {
 		ParentCommitHash: parent,
 		Message:          commitMessage,
 	}
-	content, err := json.MarshalIndent(commit, "", "    ")
+	hash, err := files.CreateObject(&commit)
 	if err != nil {
 		return err
 	}
-	hash := utils.GetSHA1(content)
-	files.CreateCommit(hash, content) // Create a new commit object
 	files.WriteBranchRef(branch, hash)
 	return nil
 }
@@ -47,7 +44,7 @@ func CreateCommit(message []string) error {
 // Returns the hash of the built tree
 func buildTree(path string, indexData map[string]string) (string, error) {
 	toStage := slices.Collect(maps.Keys(indexData))
-	tree := map[string]string{}
+	tree := files.Tree(map[string]string{})
 	// Get all of the sub directories to the current directory
 	// Build a tree for each one recusivley
 	// Add this tree to the current tree
@@ -63,11 +60,9 @@ func buildTree(path string, indexData map[string]string) (string, error) {
 	for _, filePath := range filepaths {
 		tree[filePath] = indexData[filepath.Join(path, filePath)]
 	}
-	content, err := json.MarshalIndent(tree, "", "    ")
+	hash, err := files.CreateObject(&tree)
 	if err != nil {
 		return "", err
 	}
-	hash := utils.GetSHA1(content)
-	files.CreateTree(hash, content)
 	return hash, nil
 }

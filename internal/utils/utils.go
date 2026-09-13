@@ -84,7 +84,7 @@ func ExpandPaths(paths []string) ([]string, error) {
 			return nil
 		})
 		if err != nil {
-			return nil, nil
+			return nil, err
 		}
 	}
 	return files, nil

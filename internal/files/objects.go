@@ -1,8 +1,11 @@
 package files
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/noamkalmar/bit/internal/utils"
 )
 
 type ObjectType int
@@ -19,6 +22,16 @@ var objectTypeToFolderName = map[ObjectType]string{
 	CommitType: "commits",
 }
 
+type Object interface {
+	Type() ObjectType
+
+	Serialize() ([]byte, error)
+}
+
+type Blob []byte
+
+type Tree map[string]string
+
 // A commit object has a defined structure, therefore we can define how to parse it as json
 type Commit struct {
 	TreeHash         string `json:"tree"`
@@ -26,25 +39,43 @@ type Commit struct {
 	Message          string `json:"message"`
 }
 
-func createObject(objectType ObjectType, hash string, content []byte) error {
-	folderName := objectTypeToFolderName[objectType]
+func (b *Blob) Type() ObjectType {
+	return BlobType
+}
+
+func (b *Blob) Serialize() ([]byte, error) {
+	return []byte(*b), nil
+}
+
+func (t *Tree) Type() ObjectType {
+	return TreeType
+}
+
+func (t *Tree) Serialize() ([]byte, error) {
+	return json.MarshalIndent(*t, "", "    ")
+}
+
+func (c *Commit) Type() ObjectType {
+	return CommitType
+}
+
+func (c *Commit) Serialize() ([]byte, error) {
+	return json.MarshalIndent(*c, "", "    ")
+}
+
+// Returns the hash of the object
+func CreateObject(object Object) (string, error) {
+	folderName := objectTypeToFolderName[object.Type()]
+	content, err := object.Serialize()
+	if err != nil {
+		return "", err
+	}
+	hash := utils.GetSHA1(content)
 	file, err := os.Create(filepath.Join(OBJECTS_PATH, folderName, hash))
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 	file.Write(content)
-	return nil
-}
-
-func CreateBlob(hash string, content []byte) error {
-	return createObject(BlobType, hash, content)
-}
-
-func CreateCommit(hash string, content []byte) error {
-	return createObject(CommitType, hash, content)
-}
-
-func CreateTree(hash string, content []byte) error {
-	return createObject(TreeType, hash, content)
+	return hash, nil
 }
