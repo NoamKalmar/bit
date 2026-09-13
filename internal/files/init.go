@@ -11,7 +11,7 @@ func IsProjectInitialized() bool {
 }
 
 func InitMainDir() error {
-	// Initalizing default dirs
+	// Initializing default dirs
 	paths := []string{
 		".bit/objects/commits",
 		".bit/objects/trees",
@@ -22,7 +22,7 @@ func InitMainDir() error {
 	if err != nil {
 		return err
 	}
-	// Initalizing default files
+	// Initializing default files
 	err = os.WriteFile(".bit/branches/main", []byte{}, 0644)
 	err = os.WriteFile(".bit/stage", []byte("{}"), 0644)
 	// Head file should be initialized to point to the main branch
