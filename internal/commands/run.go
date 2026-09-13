@@ -7,21 +7,21 @@ import (
 )
 
 func RunCommand(command string, args []string) {
-	if command != "init" && !files.IsProjectInitalized() {
+	if command != "init" && !files.IsProjectInitialized() {
 		fmt.Println("Error: please run 'bit init' to initalize the project before running other commands")
 		return
 	}
 	switch command {
 	case "init":
-		if files.IsProjectInitalized() {
-			fmt.Println("Error: project is already initalized")
+		if files.IsProjectInitialized() {
+			fmt.Println("Error: project is already initialized")
 			return
 		}
 		err := files.InitMainDir()
 		if err != nil {
 			fmt.Println("Error while tring to init project: " + err.Error())
 		} else {
-			fmt.Println("Project initalized successfully")
+			fmt.Println("Project initialized successfully")
 		}
 	case "stage":
 		err := StageFiles(args)

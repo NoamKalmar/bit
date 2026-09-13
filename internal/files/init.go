@@ -6,7 +6,7 @@ import (
 	"github.com/noamkalmar/bit/internal/utils"
 )
 
-func IsProjectInitalized() bool {
+func IsProjectInitialized() bool {
 	return utils.IsDir(".bit")
 }
 
@@ -25,7 +25,7 @@ func InitMainDir() error {
 	// Initalizing default files
 	err = os.WriteFile(".bit/branches/main", []byte{}, 0644)
 	err = os.WriteFile(".bit/stage", []byte("{}"), 0644)
-	// Head file should be initalized to point to the main branch
+	// Head file should be initialized to point to the main branch
 	err = os.WriteFile(".bit/head", []byte("main"), 0644)
 	return err
 }
