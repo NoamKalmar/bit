@@ -8,7 +8,7 @@ import (
 
 func RunCommand(command string, args []string) {
 	if command != "init" && !files.IsProjectInitialized() {
-		fmt.Println("Error: please run 'bit init' to initalize the project before running other commands")
+		fmt.Println("Error: please run 'bit init' to initialize the project before running other commands")
 		return
 	}
 	switch command {

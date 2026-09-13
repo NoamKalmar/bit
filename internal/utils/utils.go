@@ -1,16 +1,17 @@
 package utils
 
 import (
+	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
-	"hash"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 )
 
-func GetHash(content []byte, hasher hash.Hash) string {
+func GetSHA1(content []byte) string {
+	hasher := sha1.New()
 	hasher.Write(content)
 	hashBytes := hasher.Sum(nil)
 	hashString := hex.EncodeToString(hashBytes)

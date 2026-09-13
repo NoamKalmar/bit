@@ -15,13 +15,13 @@ func fileToBlob(path string, hasher hash.Hash) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	hash := utils.GetHash(content, hasher)
+	hash := utils.GetSHA1(content)
 	files.CreateBlob(hash, content)
 	return hash, nil
 }
 
 func StageFiles(paths []string) error {
-	stageData, err := files.ReadStageFile()
+	stageData, err := files.ReadIndexFile()
 	if err != nil {
 		return err
 	}
@@ -37,12 +37,12 @@ func StageFiles(paths []string) error {
 		}
 		stageData[path] = hash
 	}
-	err = files.WriteStageFile(stageData)
+	err = files.WriteIndexFile(stageData)
 	return err
 }
 
 func UnstageFiles(paths []string) error {
-	stageData, err := files.ReadStageFile()
+	stageData, err := files.ReadIndexFile()
 	if err != nil {
 		return err
 	}
@@ -53,6 +53,6 @@ func UnstageFiles(paths []string) error {
 	for _, path := range expandedPaths {
 		delete(stageData, path)
 	}
-	err = files.WriteStageFile(stageData)
+	err = files.WriteIndexFile(stageData)
 	return err
 }

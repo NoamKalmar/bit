@@ -1,9 +1,7 @@
 package commands
 
 import (
-	"crypto/sha1"
 	"encoding/json"
-	"hash"
 	"maps"
 	"path/filepath"
 	"slices"
@@ -23,12 +21,11 @@ func CreateCommit(message []string) error {
 	if err != nil {
 		return err
 	}
-	stageData, err := files.ReadStageFile()
+	stageData, err := files.ReadIndexFile()
 	if err != nil {
 		return err
 	}
-	hasher := sha1.New()
-	treeHash, err := buildTree(".", stageData, hasher)
+	treeHash, err := buildTree(".", stageData)
 	if err != nil {
 		return err
 	}
@@ -41,14 +38,14 @@ func CreateCommit(message []string) error {
 	if err != nil {
 		return err
 	}
-	hash := utils.GetHash(content, hasher)
+	hash := utils.GetSHA1(content)
 	files.CreateCommit(hash, content) // Create a new commit object
 	files.WriteBranchRef(branch, hash)
 	return nil
 }
 
 // Returns the hash of the built tree
-func buildTree(path string, stageData map[string]string, hasher hash.Hash) (string, error) {
+func buildTree(path string, stageData map[string]string) (string, error) {
 	toStage := slices.Collect(maps.Keys(stageData))
 	tree := map[string]string{}
 	// Get all of the sub directories to the current directory
@@ -56,7 +53,7 @@ func buildTree(path string, stageData map[string]string, hasher hash.Hash) (stri
 	// Add this tree to the current tree
 	subdirs, filepaths := utils.ReadDirFromPaths(toStage, path)
 	for _, subdir := range subdirs {
-		hash, err := buildTree(path+"/"+subdir, stageData, hasher)
+		hash, err := buildTree(path+"/"+subdir, stageData)
 		if err != nil {
 			return "", err
 		}
@@ -70,7 +67,7 @@ func buildTree(path string, stageData map[string]string, hasher hash.Hash) (stri
 	if err != nil {
 		return "", err
 	}
-	hash := utils.GetHash(content, hasher)
+	hash := utils.GetSHA1(content)
 	files.CreateTree(hash, content)
 	return hash, nil
 }

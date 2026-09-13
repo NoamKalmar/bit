@@ -6,19 +6,19 @@ import (
 	"github.com/noamkalmar/bit/internal/utils"
 )
 
-func ReadStageFile() (map[string]string, error) {
-	return utils.ReadJsonStrStr(".bit/stage")
+func ReadIndexFile() (map[string]string, error) {
+	return utils.ReadJsonStrStr(INDEX_PATH)
 }
 
-func WriteStageFile(stagingData map[string]string) error {
-	return utils.WriteJsonStrStr(".bit/stage", stagingData)
+func WriteIndexFile(stagingData map[string]string) error {
+	return utils.WriteJsonStrStr(INDEX_PATH, stagingData)
 }
 
 func ReadHeadFile() (string, error) {
-	content, err := os.ReadFile(".bit/head")
+	content, err := os.ReadFile(HEAD_PATH)
 	return string(content), err
 }
 
 func WriteHeadFile(branchName string) error {
-	return os.WriteFile(".bit/head", []byte(branchName), 0644)
+	return os.WriteFile(HEAD_PATH, []byte(branchName), 0644)
 }
