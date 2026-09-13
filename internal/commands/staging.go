@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"crypto/sha1"
-	"hash"
 	"os"
 
 	"github.com/noamkalmar/bit/internal/files"
@@ -10,7 +8,7 @@ import (
 )
 
 // Returns the hash of the new blob
-func fileToBlob(path string, hasher hash.Hash) (string, error) {
+func fileToBlob(path string) (string, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -25,13 +23,12 @@ func StageFiles(paths []string) error {
 	if err != nil {
 		return err
 	}
-	hasher := sha1.New()
 	expandedPaths, err := utils.ExpandPaths(paths)
 	if err != nil {
 		return err
 	}
 	for _, path := range expandedPaths {
-		hash, err := fileToBlob(path, hasher)
+		hash, err := fileToBlob(path)
 		if err != nil {
 			return err
 		}
