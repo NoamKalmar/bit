@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -132,4 +133,8 @@ func WriteJsonStrStr(path string, data map[string]string) error {
 		return err
 	}
 	return nil
+}
+
+func GetKeys[M ~map[K]V, K comparable, V any](m M) []K {
+	return slices.Collect(maps.Keys(m))
 }

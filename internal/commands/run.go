@@ -38,6 +38,11 @@ func RunCommand(command string, args []string) {
 		if err != nil {
 			fmt.Println("Error while tring to create a new commit: " + err.Error())
 		}
+	case "status":
+		err := PrintStatus()
+		if err != nil {
+			fmt.Println("Error while trying to display status: " + err.Error())
+		}
 	default:
 		fmt.Println("Unknown command: " + command)
 	}
