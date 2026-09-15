@@ -44,6 +44,20 @@ func IsFile(path string) bool {
 	return info.Mode().IsRegular()
 }
 
+// Returns files, dirs
+func ClassifyPaths(paths []string) ([]string, []string) {
+	files := []string{}
+	dirs := []string{}
+	for _, path := range paths {
+		if IsFile(path) {
+			files = append(files, path)
+		} else if IsDir(path) {
+			dirs = append(dirs, path)
+		}
+	}
+	return files, dirs
+}
+
 // Returns subdirs, files
 func ReadDirFromPaths(paths []string, currentPath string) ([]string, []string) {
 	currentPath = filepath.Clean(currentPath)
@@ -71,6 +85,7 @@ func ReadDirFromPaths(paths []string, currentPath string) ([]string, []string) {
 	return subdirs, files
 }
 
+// Returns all files that appear in any tree of the specified paths
 func ExpandPaths(paths []string) ([]string, error) {
 	var files []string
 	for _, path := range paths {
@@ -79,7 +94,7 @@ func ExpandPaths(paths []string) ([]string, error) {
 				return err
 			}
 			if !d.IsDir() {
-				files = append(files, path)
+				files = append(files, filepath.Clean(path))
 			}
 			return nil
 		})
@@ -88,6 +103,10 @@ func ExpandPaths(paths []string) ([]string, error) {
 		}
 	}
 	return files, nil
+}
+
+func GetAllFilePaths() ([]string, error) {
+	return ExpandPaths([]string{"."})
 }
 
 func ReadJsonStrStr(path string) (map[string]string, error) {
