@@ -79,3 +79,16 @@ func CreateObject(object Object) (string, error) {
 	file.Write(content)
 	return hash, nil
 }
+
+func ReadCommit(hash string) (Commit, error) {
+	content, err := os.ReadFile(filepath.Join(COMMITS_PATH, hash))
+	if err != nil {
+		return Commit{}, nil
+	}
+	var commit Commit
+	err = json.Unmarshal(content, &commit)
+	if err != nil {
+		return Commit{}, nil
+	}
+	return commit, nil
+}
