@@ -19,6 +19,14 @@ func GetSHA1(content []byte) string {
 	return hashString
 }
 
+func ReadGetSHA1(path string) (string, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return "", nil
+	}
+	return GetSHA1(content), nil
+}
+
 func CreateDirs(paths []string) error {
 	for _, path := range paths {
 		err := os.MkdirAll(path, 0755)
@@ -137,4 +145,26 @@ func WriteJsonStrStr(path string, data map[string]string) error {
 
 func GetKeys[M ~map[K]V, K comparable, V any](m M) []K {
 	return slices.Collect(maps.Keys(m))
+}
+
+func SlicesDifferences[T comparable](a []T, b []T) (onlyA []T, onlyB []T) {
+	aSet := make(map[T]struct{}, len(b))
+	for _, value := range a {
+		aSet[value] = struct{}{}
+	}
+	bSet := make(map[T]struct{}, len(b))
+	for _, value := range a {
+		bSet[value] = struct{}{}
+	}
+	for _, value := range a {
+		if !slices.Contains(b, value) {
+			onlyA = append(onlyA, value)
+		}
+	}
+	for _, value := range b {
+		if !slices.Contains(a, value) {
+			onlyB = append(onlyB, value)
+		}
+	}
+	return onlyA, onlyB
 }

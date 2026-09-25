@@ -13,8 +13,8 @@ func ReadIndexFile() (map[string]string, error) {
 	return utils.ReadJsonStrStr(INDEX_PATH)
 }
 
-func WriteIndexFile(stagingData map[string]string) error {
-	return utils.WriteJsonStrStr(INDEX_PATH, stagingData)
+func WriteIndexFile(indexData map[string]string) error {
+	return utils.WriteJsonStrStr(INDEX_PATH, indexData)
 }
 
 func ReadHeadFile() (string, error) {
@@ -24,6 +24,15 @@ func ReadHeadFile() (string, error) {
 
 func WriteHeadFile(branchName string) error {
 	return os.WriteFile(HEAD_PATH, []byte(branchName), 0644)
+}
+
+func GetLastCommitHash() (string, error) {
+	branch, err := ReadHeadFile()
+	if err != nil {
+		return "", err
+	}
+	commit, err := ReadBranchRef(branch)
+	return commit, err
 }
 
 func IgnoreFileExists() bool {
@@ -42,7 +51,7 @@ func ReadIgnoreFile() ([]string, error) {
 	return paths, nil
 }
 
-func GetAllNonIgnoredFiles() ([]string, error) {
+func GetWorkspaceFiles() ([]string, error) {
 	ignorePaths := []string{}
 	if IgnoreFileExists() {
 		var err error
