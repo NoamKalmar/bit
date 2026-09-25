@@ -158,24 +158,24 @@ func GetAllFilePaths() (PathSet, error) {
 }
 
 func ReadJsonStrStr(path string) (map[string]string, error) {
-	stageFileData, err := os.ReadFile(path)
+	fileData, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	var stagingData map[string]string
-	err = json.Unmarshal(stageFileData, &stagingData)
+	var data map[string]string
+	err = json.Unmarshal(fileData, &data)
 	if err != nil {
 		return nil, err
 	}
-	return stagingData, nil
+	return data, nil
 }
 
 func WriteJsonStrStr(path string, data map[string]string) error {
-	stageFileData, err := json.MarshalIndent(data, "", "    ")
+	fileData, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(path, stageFileData, 0644)
+	err = os.WriteFile(path, fileData, 0644)
 	if err != nil {
 		return err
 	}
