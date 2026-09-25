@@ -12,14 +12,13 @@ func IsProjectInitialized() bool {
 
 func InitMainDir() error {
 	// Initializing default dirs
-	paths := []string{
-		BIT_PATH,
-		BRANCHES_PATH,
-		OBJECTS_PATH,
-		BLOBS_PATH,
-		TREES_PATH,
-		COMMITS_PATH,
-	}
+	paths := make(utils.PathSet)
+	paths.Add(BIT_PATH)
+	paths.Add(BRANCHES_PATH)
+	paths.Add(OBJECTS_PATH)
+	paths.Add(BLOBS_PATH)
+	paths.Add(TREES_PATH)
+	paths.Add(COMMITS_PATH)
 	err := utils.CreateDirs(paths)
 	if err != nil {
 		return err

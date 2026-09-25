@@ -11,6 +11,45 @@ import (
 	"strings"
 )
 
+type PathSet map[string]struct{}
+
+func (s PathSet) Contains(path string) bool {
+	_, ok := s[filepath.Clean(path)]
+	return ok
+}
+
+func (s PathSet) Add(path string) {
+	s[filepath.Clean(path)] = struct{}{}
+}
+
+func (s PathSet) AddSet(paths PathSet) {
+	for path := range paths {
+		s.Add(path)
+	}
+}
+
+func (s PathSet) Remove(path string) {
+	delete(s, filepath.Clean(path))
+}
+
+func (s PathSet) Difference(other PathSet) PathSet {
+	result := make(PathSet)
+	for path := range s {
+		if !other.Contains(path) {
+			result.Add(path)
+		}
+	}
+	return result
+}
+
+func SliceToPathSet(slice []string) PathSet {
+	paths := make(PathSet)
+	for _, path := range slice {
+		paths.Add(path)
+	}
+	return paths
+}
+
 func GetSHA1(content []byte) string {
 	hasher := sha1.New()
 	hasher.Write(content)
@@ -27,8 +66,8 @@ func ReadGetSHA1(path string) (string, error) {
 	return GetSHA1(content), nil
 }
 
-func CreateDirs(paths []string) error {
-	for _, path := range paths {
+func CreateDirs(paths PathSet) error {
+	for path := range paths {
 		err := os.MkdirAll(path, 0755)
 		if err != nil {
 			return err
@@ -54,26 +93,26 @@ func IsFile(path string) bool {
 }
 
 // Returns files, dirs
-func ClassifyPaths(paths []string) ([]string, []string) {
-	files := []string{}
-	dirs := []string{}
-	for _, path := range paths {
+func ClassifyPaths(paths PathSet) (PathSet, PathSet) {
+	files := make(PathSet)
+	dirs := make(PathSet)
+	for path := range paths {
 		if IsFile(path) {
-			files = append(files, path)
+			files.Add(path)
 		} else if IsDir(path) {
-			dirs = append(dirs, path)
+			dirs.Add(path)
 		}
 	}
 	return files, dirs
 }
 
 // Returns subdirs, files
-func ReadDirFromPaths(paths []string, currentPath string) ([]string, []string) {
+func ReadDirFromPaths(paths PathSet, currentPath string) (PathSet, PathSet) {
 	currentPath = filepath.Clean(currentPath)
 	currentPath = filepath.ToSlash(currentPath)
-	var files []string
-	var subdirs []string
-	for _, path := range paths {
+	files := make(PathSet)
+	subdirs := make(PathSet)
+	for path := range paths {
 		path = filepath.ToSlash(path)
 		if currentPath != "." {
 			var found bool
@@ -83,27 +122,25 @@ func ReadDirFromPaths(paths []string, currentPath string) ([]string, []string) {
 			}
 		}
 		if !strings.Contains(path, "/") {
-			files = append(files, path)
+			files.Add(path)
 		} else {
-			dir := strings.Split(path, "/")[0]
-			if !slices.Contains(subdirs, dir) {
-				subdirs = append(subdirs, dir)
-			}
+			dir, _, _ := strings.Cut(path, "/")
+			subdirs.Add(dir)
 		}
 	}
 	return subdirs, files
 }
 
 // Returns all files that appear in any tree of the specified paths
-func ExpandPaths(paths []string) ([]string, error) {
-	var files []string
-	for _, path := range paths {
+func ExpandPaths(paths PathSet) (PathSet, error) {
+	files := make(PathSet)
+	for path := range paths {
 		err := filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
 			if !d.IsDir() {
-				files = append(files, filepath.Clean(path))
+				files.Add(path)
 			}
 			return nil
 		})
@@ -114,8 +151,10 @@ func ExpandPaths(paths []string) ([]string, error) {
 	return files, nil
 }
 
-func GetAllFilePaths() ([]string, error) {
-	return ExpandPaths([]string{"."})
+func GetAllFilePaths() (PathSet, error) {
+	dot := PathSet{}
+	dot.Add(".")
+	return ExpandPaths(dot)
 }
 
 func ReadJsonStrStr(path string) (map[string]string, error) {
@@ -145,26 +184,4 @@ func WriteJsonStrStr(path string, data map[string]string) error {
 
 func GetKeys[M ~map[K]V, K comparable, V any](m M) []K {
 	return slices.Collect(maps.Keys(m))
-}
-
-func SlicesDifferences[T comparable](a []T, b []T) (onlyA []T, onlyB []T) {
-	aSet := make(map[T]struct{}, len(b))
-	for _, value := range a {
-		aSet[value] = struct{}{}
-	}
-	bSet := make(map[T]struct{}, len(b))
-	for _, value := range a {
-		bSet[value] = struct{}{}
-	}
-	for _, value := range a {
-		if !slices.Contains(b, value) {
-			onlyA = append(onlyA, value)
-		}
-	}
-	for _, value := range b {
-		if !slices.Contains(a, value) {
-			onlyB = append(onlyB, value)
-		}
-	}
-	return onlyA, onlyB
 }

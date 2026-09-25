@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/noamkalmar/bit/internal/files"
+	"github.com/noamkalmar/bit/internal/utils"
 )
 
 func RunCommand(command string, args []string) {
@@ -24,12 +25,12 @@ func RunCommand(command string, args []string) {
 			fmt.Println("Project initialized successfully")
 		}
 	case "stage":
-		err := StageFiles(args)
+		err := StageFiles(utils.SliceToPathSet(args))
 		if err != nil {
 			fmt.Println("Error while tring to stage file/s: " + err.Error())
 		}
 	case "unstage":
-		err := UnstageFiles(args)
+		err := UnstageFiles(utils.SliceToPathSet(args))
 		if err != nil {
 			fmt.Println("Error while tring to unstage file/s: " + err.Error())
 		}

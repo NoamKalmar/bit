@@ -2,8 +2,6 @@ package files
 
 import (
 	"os"
-	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/noamkalmar/bit/internal/utils"
@@ -39,20 +37,21 @@ func IgnoreFileExists() bool {
 	return utils.IsFile(IGNORE_PATH)
 }
 
-func ReadIgnoreFile() ([]string, error) {
+func ReadIgnoreFile() (utils.PathSet, error) {
 	content, err := os.ReadFile(IGNORE_PATH)
 	if err != nil {
 		return nil, err
 	}
-	paths := strings.Split(string(content), "\n")
-	for i, path := range paths {
-		paths[i] = filepath.Clean(strings.TrimSpace(path))
+	pathSlice := strings.Split(string(content), "\n")
+	paths := make(utils.PathSet)
+	for _, path := range pathSlice {
+		paths.Add(strings.TrimSpace(path))
 	}
 	return paths, nil
 }
 
-func GetWorkspaceFiles() ([]string, error) {
-	ignorePaths := []string{}
+func GetWorkspaceFiles() (utils.PathSet, error) {
+	ignorePaths := make(utils.PathSet)
 	if IgnoreFileExists() {
 		var err error
 		ignorePaths, err = ReadIgnoreFile()
@@ -60,7 +59,7 @@ func GetWorkspaceFiles() ([]string, error) {
 			return nil, err
 		}
 	}
-	ignorePaths = append(ignorePaths, BIT_PATH) // the .bit folder should be ignored
+	ignorePaths.Add(BIT_PATH) // the .bit folder should be ignored
 	ignoreFiles, ignoreDirs := utils.ClassifyPaths(ignorePaths)
 
 	files, err := utils.GetAllFilePaths()
@@ -69,18 +68,19 @@ func GetWorkspaceFiles() ([]string, error) {
 	}
 
 	// removing all files that appear in the ignore file
-	files = slices.DeleteFunc(files, func(path string) bool {
-		return slices.Contains(ignoreFiles, path)
-	})
+	for path := range files {
+		if ignoreFiles.Contains(path) {
+			files.Remove(path)
+		}
+	}
 
 	// removing all files that are in the tree of an ignored directory
-	files = slices.DeleteFunc(files, func(path string) bool {
-		for _, dir := range ignoreDirs {
-			if strings.HasPrefix(path, dir+"\\") {
-				return true
+	for path := range files {
+		for dir := range ignoreDirs {
+			if strings.HasPrefix(path, dir+"\\") || strings.HasPrefix(path, dir+"/") {
+				files.Remove(path)
 			}
 		}
-		return false
-	})
+	}
 	return files, nil
 }

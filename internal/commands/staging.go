@@ -2,7 +2,6 @@ package commands
 
 import (
 	"os"
-	"slices"
 
 	"github.com/noamkalmar/bit/internal/files"
 	"github.com/noamkalmar/bit/internal/utils"
@@ -22,7 +21,7 @@ func fileToBlob(path string) (string, error) {
 	return hash, nil
 }
 
-func StageFiles(paths []string) error {
+func StageFiles(paths utils.PathSet) error {
 	workspaceFiles, err := files.GetWorkspaceFiles()
 	if err != nil {
 		return err
@@ -35,13 +34,13 @@ func StageFiles(paths []string) error {
 	if err != nil {
 		return err
 	}
-	nonIngoredExpandedPaths := []string{}
-	for _, path := range expandedPaths {
-		if slices.Contains(workspaceFiles, path) {
-			nonIngoredExpandedPaths = append(nonIngoredExpandedPaths, path)
+	nonIgnoredPaths := make(utils.PathSet)
+	for path := range expandedPaths {
+		if workspaceFiles.Contains(path) {
+			nonIgnoredPaths.Add(path)
 		}
 	}
-	for _, path := range nonIngoredExpandedPaths {
+	for path := range nonIgnoredPaths {
 		hash, err := fileToBlob(path)
 		if err != nil {
 			return err
@@ -52,7 +51,7 @@ func StageFiles(paths []string) error {
 	return err
 }
 
-func UnstageFiles(paths []string) error {
+func UnstageFiles(paths utils.PathSet) error {
 	indexData, err := files.ReadIndexFile()
 	if err != nil {
 		return err
@@ -61,7 +60,7 @@ func UnstageFiles(paths []string) error {
 	if err != nil {
 		return err
 	}
-	for _, path := range expandedPaths {
+	for path := range expandedPaths {
 		delete(indexData, path)
 	}
 	err = files.WriteIndexFile(indexData)

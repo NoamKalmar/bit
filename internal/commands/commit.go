@@ -41,13 +41,13 @@ func CreateCommit(message []string) error {
 
 // Returns the hash of the built tree
 func buildTree(path string, indexData map[string]string) (string, error) {
-	indexedFiles := utils.GetKeys(indexData)
+	indexedFiles := utils.SliceToPathSet(utils.GetKeys(indexData))
 	tree := files.Tree(map[string]string{})
 	// Get all of the sub directories to the current directory
 	// Build a tree for each one recusivley
 	// Add this tree to the current tree
 	subdirs, filepaths := utils.ReadDirFromPaths(indexedFiles, path)
-	for _, subdir := range subdirs {
+	for subdir := range subdirs {
 		hash, err := buildTree(path+"/"+subdir, indexData)
 		if err != nil {
 			return "", err
@@ -55,7 +55,7 @@ func buildTree(path string, indexData map[string]string) (string, error) {
 		tree[subdir+"/"] = hash
 	}
 	// Add blobs to the current tree
-	for _, filePath := range filepaths {
+	for filePath := range filepaths {
 		tree[filePath] = indexData[filepath.Join(path, filePath)]
 	}
 	hash, err := files.CreateObject(&tree)
