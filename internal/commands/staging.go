@@ -2,6 +2,7 @@ package commands
 
 import (
 	"os"
+	"slices"
 
 	"github.com/noamkalmar/bit/internal/files"
 	"github.com/noamkalmar/bit/internal/utils"
@@ -22,6 +23,10 @@ func fileToBlob(path string) (string, error) {
 }
 
 func StageFiles(paths []string) error {
+	workspaceFiles, err := files.GetWorkspaceFiles()
+	if err != nil {
+		return err
+	}
 	indexData, err := files.ReadIndexFile()
 	if err != nil {
 		return err
@@ -30,7 +35,13 @@ func StageFiles(paths []string) error {
 	if err != nil {
 		return err
 	}
+	nonIngoredExpandedPaths := []string{}
 	for _, path := range expandedPaths {
+		if slices.Contains(workspaceFiles, path) {
+			nonIngoredExpandedPaths = append(nonIngoredExpandedPaths, path)
+		}
+	}
+	for _, path := range nonIngoredExpandedPaths {
 		hash, err := fileToBlob(path)
 		if err != nil {
 			return err
